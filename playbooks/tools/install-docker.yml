@@ -1,0 +1,65 @@
+---
+- name: Configure Docker permissions
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Create docker group
+      group:
+        name: docker
+        state: present
+      become: true
+
+    - name: Add user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      become: true
+
+    - name: Ensure /var/run/docker.sock exists
+      stat:
+        path: /var/run/docker.sock
+      register: docker_sock
+
+    - name: Set proper permissions on docker.sock
+      file:
+        path: /var/run/docker.sock
+        mode: "0666"
+        group: docker
+      become: true
+      when: docker_sock.stat.exists
+
+    - name: Reset SSH connection to allow user changes to affect 'current login user'
+      meta: reset_connection
+
+- name: Install Docker on Ubuntu
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      command: sudo apt-get update
+
+    - name: Install ca-certificates and curl
+      command: sudo apt-get install ca-certificates curl
+
+    - name: Create keyrings directory
+      command: sudo install -m 0755 -d /etc/apt/keyrings
+
+    - name: Download Docker's GPG key
+      command: sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+
+    - name: Set permissions for Docker's GPG key
+      command: sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    - name: Add Docker repository
+      shell: |
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - name: Update apt cache again
+      command: sudo apt-get update -y
+
+    - name: Install Docker packages
+      command: sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin

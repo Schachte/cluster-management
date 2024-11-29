@@ -1,0 +1,2 @@
+---
+home_dir: "{{ lookup('env', 'REMOTE_HOME_DIR', default='/home/schachte') }}"

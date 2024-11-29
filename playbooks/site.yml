@@ -1,0 +1,9 @@
+---
+- name: Install Docker
+  import_playbook: tools/install-docker.yml
+
+- name: Deploy PostgreSQL
+  import_playbook: containers/deploy-postgres.yml
+
+- name: Deploy Gitea
+  import_playbook: containers/deploy-gitea.yml

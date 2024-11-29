@@ -1,0 +1,6 @@
+---
+- include_tasks: deploy.yml
+  when: not rollback | default(false)
+
+- include_tasks: rollback.yml
+  when: rollback | default(false)

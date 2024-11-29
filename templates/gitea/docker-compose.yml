@@ -1,0 +1,36 @@
+services:
+  server:
+    image: gitea/gitea:{{ gitea_version }}
+    container_name: "{{ service_config.name }}"
+    environment:
+      - USER_UID={{ service_config.environment.USER_UID }}
+      - USER_GID={{ service_config.environment.USER_GID }}
+    restart: always
+    networks:
+      gitea_net:
+        ipv4_address: "{{ service_config.ip_address }}"
+    volumes:
+      - gitea_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "{{ service_config.port }}:3000"
+      - "{{ service_config.ssh_port }}:22"
+    healthcheck:
+      test: "curl -fSs {{ service_config.ip_address }}:3000/api/healthz || exit 1"
+      start_period: 60s
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+networks:
+  gitea_net:
+    name: gitea_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.21.0.0/24"
+
+volumes:
+  gitea_data:

@@ -1,0 +1,26 @@
+---
+# ansible vars
+gitea_data_dir: "/data/gitea"
+gitea_backup_dir: "/backup/gitea"
+gitea_version: "1.22.4"
+
+# directories
+service_data_dir: "{{ gitea_data_dir }}"
+service_directories:
+  - "{{ gitea_data_dir }}"
+
+# docker config
+service_config:
+  name: gitea
+  port: 3000
+  volume_name: gitea_data
+  ssh_port: 222
+  environment:
+    USER_UID: 1000
+    USER_GID: 1000
+  ip_address: "172.21.0.2"
+
+# templates
+config_templates:
+  - src: "../../templates/gitea/docker-compose.yml"
+    dest: "{{ gitea_data_dir }}/docker-compose.yml"

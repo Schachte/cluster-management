@@ -1,0 +1,5 @@
+---
+directory_mode: "0755"
+service_host: "localhost"
+service_timeout: 30
+remove_volumes: false

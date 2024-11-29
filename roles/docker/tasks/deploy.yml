@@ -1,0 +1,141 @@
+---
+- name: Debug - Show service configuration
+  debug:
+    msg: >-
+      {{
+        service_config |
+        to_nice_json(indent=2) |
+        regex_replace('\\\\n', '\n') |
+        regex_replace('\\\\', '') 
+      }}
+  when: debug | default(false) | bool
+
+- name: Create service directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "{{ directory_mode | default('0755') }}"
+  loop: "{{ service_directories }}"
+  when: service_directories is defined
+
+- name: Configure service files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode | default('0644') }}"
+  loop: "{{ config_templates }}"
+  when: config_templates is defined
+
+- name: Check for existing containers
+  community.docker.docker_container_info:
+    name: "{{ service_config.name }}"
+  register: existing_container
+  ignore_errors: true
+
+- name: Stop existing container if running
+  community.docker.docker_container:
+    name: "{{ service_config.name }}"
+    state: stopped
+  when: existing_container.exists
+  ignore_errors: true
+
+- name: Remove existing container
+  community.docker.docker_container:
+    name: "{{ service_config.name }}"
+    state: absent
+    force_kill: true
+  when: existing_container.exists
+  ignore_errors: true
+
+- name: Check if services exist
+  community.docker.docker_compose_v2:
+    project_src: "{{ service_data_dir }}"
+    files: docker-compose.yml
+    state: present
+  register: compose_state
+  ignore_errors: true
+
+- name: Debug remove_volumes value
+  debug:
+    msg: "Remove volumes setting: {{ remove_volumes | default(false) }}"
+  when:
+    - compose_state is success
+    - debug | default(false) | bool
+
+- name: Ensure previous containers are removed
+  community.docker.docker_compose_v2:
+    project_src: "{{ service_data_dir }}"
+    files: docker-compose.yml
+    state: absent
+    remove_volumes: "{{ remove_volumes | default(false) }}"
+  when:
+    - compose_state is success
+    - remove_volumes
+
+- name: Include pre-deploy tasks
+  include_tasks: "{{ pre_deploy_tasks }}"
+  when: pre_deploy_tasks is defined
+
+- name: Deploy service with docker-compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ service_data_dir }}"
+    files:
+      - docker-compose.yml
+    state: present
+    remove_orphans: true
+    recreate: always
+  register: deploy_result
+
+- name: Include post-deploy tasks
+  include_tasks: "{{ post_deploy_tasks }}"
+  when: post_deploy_tasks is defined
+
+- name: Wait for container to be healthy
+  community.docker.docker_container_info:
+    name: "{{ service_config.name }}"
+  register: container_info
+  until: container_info.container.State.Health.Status | lower == 'healthy'
+  retries: 30
+  delay: 1
+  changed_when: false
+  ignore_errors: "{{ debug | default(false) }}"
+
+- name: Include post-healthy tasks
+  include_tasks: "{{ post_healthy_tasks }}"
+  when: post_healthy_tasks is defined
+
+- name: Debug - Show full container state
+  vars:
+    container_state:
+      container:
+        name: "{{ container_info.container.Name | default('') }}"
+        status: "{{ container_info.container.State.Status | default('') }}"
+        health:
+          status: "{{ container_info.container.State.Health.Status | default('') }}"
+          checks: "{{ container_info.container.State.Health.Log | default([]) }}"
+        started_at: "{{ container_info.container.State.StartedAt | default('') }}"
+        complete: "{{ container_info | default('') }}"
+  debug:
+    msg: >-
+      {{
+        container_state |
+        to_nice_json(indent=2) |
+        regex_replace('\\\\n', '\n') |
+        regex_replace('\\\\', '') 
+      }}
+  when: debug | default(false) | bool
+
+- name: Debug - Show container logs if not healthy
+  command: docker logs {{ service_config.name }}
+  register: container_logs
+  when:
+    - debug | default(false) | bool
+    - container_info is defined
+
+- name: Debug - Display container logs
+  debug:
+    var: container_logs.stdout_lines
+  when:
+    - debug | default(false) | bool
+    - container_logs is defined
+    - container_logs.stdout_lines is defined

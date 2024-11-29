@@ -1,0 +1,66 @@
+# Get volume information from running container
+- name: Get volume information for the service
+  command: docker container inspect {{ service_config.name }}
+  register: container_inspect
+  ignore_errors: yes
+  changed_when: false
+
+# Extract volumes from container inspection
+- name: Set fact for container volumes
+  set_fact:
+    service_volumes: "{{ ((container_inspect.stdout | from_json)[0].Mounts | default([]) | selectattr('Type', 'eq', 'volume') | map(attribute='Name') | list) }}"
+  when: container_inspect is success
+  ignore_errors: yes
+
+- name: Debug - Show mount information
+  debug:
+    msg: |
+      All mounts for service '{{ service_config.name }}':
+      {% for mount in (container_inspect.stdout | from_json)[0].Mounts | default([]) %}
+      - Type: {{ mount.Type }}
+        Name: {{ mount.Name | default('N/A') }}
+        Source: {{ mount.Source }}
+        Destination: {{ mount.Destination }}
+      {% endfor %}
+
+      Volumes to be removed:
+      {% for volume in service_volumes %}
+      - {{ volume }}
+      {% endfor %}
+  when:
+    - debug | default(false) | bool
+    - container_inspect is success
+
+- name: Confirm volume removal
+  pause:
+    prompt: |
+      The following volumes for service '{{ service_config.name }}' will be removed:
+      {% for volume in service_volumes %}
+      - {{ volume }}
+      {% endfor %}
+
+      Note: Bind mounts will not be removed.
+
+      Press ENTER to continue or Ctrl+C to abort
+  when:
+    - container_inspect is success
+    - service_volumes | length > 0
+    - not ansible_check_mode
+    - confirm_volume_removal | default(true) | bool
+
+- name: Stop current container
+  docker_container:
+    name: "{{ service_config.name }}"
+    state: absent
+    force_kill: yes
+
+# Remove all discovered volumes
+- name: Remove service-specific volumes
+  docker_volume:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ service_volumes }}"
+  when:
+    - container_inspect is success
+    - item != ""
+  ignore_errors: yes

@@ -1,0 +1,39 @@
+---
+# ansible vars
+postgres_data_dir: "{{ home_dir }}/data/postgres"
+postgres_backup_dir: "{{ home_dir }}/backup/postgres"
+container_name: "{{ container_name | default('postgres') }}"
+
+# directories
+service_data_dir: "{{ postgres_data_dir }}"
+service_directories:
+  - "{{ postgres_data_dir }}"
+  - "{{ postgres_data_dir }}/db-data"
+
+# docker config
+service_config:
+  home_dir: "{{ home_dir }}"
+  name: "{{ container_name }}"
+  port: 5432
+  remove_volumes: "{{ remove_volumes }}"
+  postgres_version: "latest"
+  environment:
+    POSTGRES_DB: "cluster"
+    POSTGRES_USER: "{{ vault_postgres_user | default('postgres') }}"
+    POSTGRES_PASSWORD: "{{ vault_postgres_password | default('changeme') }}"
+  ip_address: "172.20.0.2"
+  configs:
+    max_connections: 200
+    shared_buffers: 2GB
+    effective_cache_size: 6GB
+
+# templates
+config_templates:
+  - src: "../../templates/postgres/postgres.conf"
+    dest: "{{ postgres_data_dir }}/postgres.conf"
+  - src: "../../templates/postgres/pg_hba.conf"
+    dest: "{{ postgres_data_dir }}/pg_hba.conf"
+  - src: "../../templates/postgres/docker-compose.yml"
+    dest: "{{ postgres_data_dir }}/docker-compose.yml"
+  - src: "../../files/postgres/init.sql"
+    dest: "{{ postgres_data_dir }}/docker_postgres_init.sql"

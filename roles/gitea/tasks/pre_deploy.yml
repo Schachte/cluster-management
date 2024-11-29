@@ -1,0 +1,4 @@
+---
+- name: Demo Pre Deploy Task
+  debug:
+    msg: "This is pre-task"

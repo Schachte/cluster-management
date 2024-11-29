@@ -1,0 +1,5 @@
+[postgres]
+db1 ansible_host=155.155.155.2
+
+[gitea]
+gitea1 ansible_host=155.155.155.2

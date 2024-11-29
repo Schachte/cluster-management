@@ -1,0 +1,4 @@
+---
+- name: Demo Post Deploy Task
+  debug:
+    msg: "This is post-task"

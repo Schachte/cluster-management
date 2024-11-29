@@ -1,0 +1,42 @@
+services:
+  postgres:
+    container_name: "{{ service_config.name }}"
+    image: postgres:{{ service_config.postgres_version }}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "{{ service_config.environment.POSTGRES_DB }}"
+      POSTGRES_USER: "{{ service_config.environment.POSTGRES_USER }}"
+      POSTGRES_PASSWORD: "{{ service_config.environment.POSTGRES_PASSWORD }}"
+      # PGDATA: "/data/postgres"
+    ports:
+      - "{{ service_config.port }}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - "{{ postgres_data_dir }}/docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql"
+      - "{{ postgres_data_dir }}/pg_hba.conf:/etc/postgresql/pg_hba.conf"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U {{ service_config.environment.POSTGRES_USER }} -d {{ service_config.environment.POSTGRES_DB }}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      postgres_net:
+        ipv4_address: "{{ service_config.ip_address }}"
+
+networks:
+  postgres_net:
+    name: postgres_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.0.0/24"
+
+volumes:
+  postgres:
+    driver: local
+    name: postgres

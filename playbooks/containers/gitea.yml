@@ -1,0 +1,16 @@
+---
+- name: Deploy Gitea
+  hosts: gitea
+  become: true
+  vars_files:
+    - ../../vars/gitea/main.yml
+  roles:
+    - role: docker
+      vars:
+        # debug: true
+        # rollback: true
+        container_volumes:
+          - gitea_data
+        pre_deploy_tasks: "../../roles/gitea/tasks/pre_deploy.yml"
+        post_deploy_tasks: "../../roles/gitea/tasks/post_deploy.yml"
+        post_healthy_tasks: "../../roles/gitea/tasks/post_healthy.yml"
