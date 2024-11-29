@@ -1,6 +1,6 @@
 ---
 - name: Configure Docker permissions
-  hosts: all
+  hosts: cluster
   become: true
   pre_tasks:
     - name: Create docker group

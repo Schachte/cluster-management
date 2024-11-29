@@ -5,6 +5,7 @@
   vars_files:
     - ../../vars/postgres/main.yml
     - ../../group_vars/all/all.yml
+
   roles:
     - role: docker
       vars:
@@ -13,6 +14,5 @@
         container_volumes:
           - postgres_data
         container_name: "postgres"
-
         # (important) prevent wiping data when redeploying
         remove_volumes: false

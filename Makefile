@@ -1,4 +1,4 @@
-.PHONY: ping setup install-roles lint test install-docker deploy-postgres deploy-gitea create-container remove-container
+.PHONY: ping setup install-roles lint test install-docker deploy-postgres deploy-gitea create-container remove-container multipass-create multipass-stop multipass-delete multipass-purge
 
 ping:
 	ansible all -m ping
@@ -35,3 +35,26 @@ deploy-%:
 		echo "No playbook found for $*"; \
 		exit 1; \
 	fi
+
+# Multipass VM Management
+multipass-create:
+	@scripts/create-multipass-vms.sh
+
+multipass-stop:
+	@echo "Stopping all Multipass VMs..."
+	@multipass list --format csv | tail -n +2 | cut -d',' -f1 | xargs -I {} multipass stop {}
+	@echo "✅ All VMs stopped"
+
+multipass-delete:
+	@echo "Deleting all Multipass VMs..."
+	@multipass list --format csv | tail -n +2 | cut -d',' -f1 | xargs -I {} multipass delete {}
+	@echo "✅ All VMs deleted"
+
+multipass-purge:
+	@echo "Purging deleted Multipass VMs..."
+	@multipass purge
+	@echo "✅ Deleted VMs purged"
+
+# Clean up everything
+multipass-cleanup: multipass-stop multipass-delete multipass-purge
+	@echo "🧹 Complete cleanup finished"
