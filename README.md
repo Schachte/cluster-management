@@ -109,6 +109,22 @@ ansible-playbook -i inventory/production playbooks/deploy-postgres.yml --ask-vau
 - [./scripts/remove-container.sh](scripts/remove-container.sh)
   - Handles easy reversal of the above command
 
+## Local Development
+
+To avoid affecting your actual nodes, I've enabled local development using Multipass Linux VMs. (See Makefile for more info).
+
+## Create VMs
+
+- `make multipass-create`
+  - Once created, grab the ips with `multipass list` and update the hosts file for `dev`
+
+The following are not needed for development:
+
+```
+# vault_password_file = credentials/.vault_pass
+# become_password_file = credentials/.become_pass
+```
+
 ## My Templating System
 
 This template provides a standardized way to deploy Docker-based services with health checking, directory management, and configuration templating. It includes pre-deploy, post-deploy, and post-healthy hooks for customization.

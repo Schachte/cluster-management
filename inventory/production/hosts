@@ -1,3 +1,8 @@
+[cluster]
+node1 ansible_host=155.155.155.2
+node2 ansible_host=155.155.155.3
+node3 ansible_host=155.155.155.4
+
 [postgres]
 db1 ansible_host=155.155.155.2
 
