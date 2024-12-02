@@ -11,3 +11,6 @@ gitea1 ansible_host=155.155.155.2
 
 [syncthing]
 syncthing1 ansible_host=155.155.155.2
+
+[mitmproxy]
+mitmproxy1 ansible_host=155.155.155.4

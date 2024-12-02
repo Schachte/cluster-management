@@ -1,0 +1,44 @@
+# services:
+#   mitmproxy:
+#     image: mitmproxy/mitmproxy
+#     container_name: "{{ service_config.name }}"
+#     restart: always
+#     networks:
+#       mitmproxy_net:
+#         ipv4_address: "{{ service_config.ip_address }}"
+#     command:
+#       - mitmweb
+#       - --mode
+#       - regular@{{ service_config.port }}
+#     ports:
+#       - "{{ service_config.port }}:8082"
+#     healthcheck:
+#       test: "curl -fSs http://localhost:{{ service_config.port }} || exit 1"
+#       interval: 5s
+#       timeout: 10s
+#       retries: 5
+#       start_period: 30s
+
+# networks:
+#   mitmproxy_net:
+#     name: mitmproxy_net
+#     driver: bridge
+#     ipam:
+#       driver: default
+#       config:
+#         - subnet: "172.25.0.0/24"
+services:
+  mitmweb:
+    image: mitmproxy/mitmproxy
+    container_name: "mitmproxy"
+    tty: true
+    ports:
+      - "8080:8080" # Web interface
+      - "8081:8081" # Proxy port
+    command: mitmweb --web-host 0.0.0.0
+    healthcheck:
+      test: "curl -f http://localhost:8081 || exit 1"
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
