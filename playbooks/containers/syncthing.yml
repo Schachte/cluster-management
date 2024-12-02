@@ -1,0 +1,15 @@
+---
+- name: Deploy Syncthing
+  hosts: syncthing
+  become: true
+  vars_files:
+    - ../../group_vars/all/all.yml
+    - ../../vars/syncthing/main.yml
+  roles:
+    - role: docker
+      vars:
+        # rollback: true
+        # debug: true
+        container_volumes:
+          - syncthing
+        container_name: "syncthing"

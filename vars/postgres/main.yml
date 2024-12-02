@@ -1,7 +1,6 @@
 ---
 # ansible vars
 postgres_data_dir: "{{ home_dir }}/data/postgres"
-postgres_backup_dir: "{{ home_dir }}/backup/postgres"
 container_name: "{{ container_name | default('postgres') }}"
 
 # directories

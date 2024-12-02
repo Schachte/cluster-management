@@ -1,0 +1,29 @@
+---
+# Where things exist within the remote node
+syncthing_data_dir: "/data/syncthing"
+
+# directories
+service_data_dir: "{{ syncthing_data_dir }}"
+service_directories:
+  - "{{ syncthing_data_dir }}"
+
+# docker config
+service_config:
+  data_dir: "/config"
+  home_dir: "{{ home_dir }}"
+  name: "{{ container_name }}"
+  version: 1.28.0
+  port: 5432
+  remove_volumes: "{{ remove_volumes }}"
+  ip_address: "172.23.0.2"
+  subnet: "172.23.0.0/24"
+  ports:
+    - "8384:8384" # Web UI
+    - "22000:22000" # TCP file transfers
+    - "22000:22000/udp" # QUIC protocol
+    - "21027:21027/udp" # Discovery broadcasts
+
+# templates
+config_templates:
+  - src: "../../templates/syncthing/docker-compose.yml"
+    dest: "{{ syncthing_data_dir }}/docker-compose.yml"
