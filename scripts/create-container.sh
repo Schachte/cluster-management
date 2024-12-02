@@ -91,6 +91,7 @@ cat >"${playbook_dir}/${container_name}.yml" <<EOF
   hosts: ${hosts_alias}
   become: true
   vars_files:
+    - ../../group_vars/all/all.yml
     - ../../vars/${container_name}/main.yml
   roles:
     - role: docker

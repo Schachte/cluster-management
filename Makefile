@@ -30,6 +30,16 @@ remove-container:
 # Dynamic targets
 deploy-%:
 	@if [ -f "playbooks/containers/$*.yml" ]; then \
+		ansible-playbook -i inventory/production playbooks/containers/$*.yml \
+			--vault-password-file=credentials/.vault_pass \
+			--become-password-file=credentials/.become_pass; \
+	else \
+		echo "No playbook found for $*"; \
+		exit 1; \
+	fi
+
+dev-deploy-%:
+	@if [ -f "playbooks/containers/$*.yml" ]; then \
 		ansible-playbook playbooks/containers/$*.yml; \
 	else \
 		echo "No playbook found for $*"; \

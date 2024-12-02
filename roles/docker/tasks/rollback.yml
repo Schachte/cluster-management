@@ -12,6 +12,12 @@
   when: container_inspect is success
   ignore_errors: yes
 
+- name: Set fact for container networks
+  set_fact:
+    service_networks: "{{ ((container_inspect.stdout | from_json)[0].NetworkSettings.Networks | default({}) | dict2items | map(attribute='key') | list) }}"
+  when: container_inspect is success
+  ignore_errors: yes
+
 - name: Debug - Show mount information
   debug:
     msg: |
@@ -60,6 +66,34 @@
     name: "{{ item }}"
     state: absent
   with_items: "{{ service_volumes }}"
+  when:
+    - container_inspect is success
+    - item != ""
+  ignore_errors: yes
+
+- name: Confirm network removal
+  pause:
+    prompt: |
+      The following networks for service '{{ service_config.name }}' will be removed:
+      {% for network in service_networks %}
+      - {{ network }}
+      {% endfor %}
+
+      Note: Default networks will not be removed.
+
+      Press ENTER to continue or Ctrl+C to abort
+  when:
+    - container_inspect is success
+    - service_networks | length > 0
+    - not ansible_check_mode
+    - confirm_network_removal | default(true) | bool
+
+# Remove all discovered networks
+- name: Remove service-specific networks
+  docker_network:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ service_networks }}"
   when:
     - container_inspect is success
     - item != ""

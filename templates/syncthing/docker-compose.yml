@@ -1,0 +1,39 @@
+services:
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:{{ service_config.version }}
+    container_name: "{{ service_config.name }}"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - syncthing_data:/data
+    ports:
+      # TODO: Template this Jijnja better
+      - "8384:8384" # Web UI
+      - "22000:22000" # TCP file transfers
+      - "22000:22000/udp" # QUIC protocol
+      - "21027:21027/udp" # Discovery broadcasts
+    restart: unless-stopped
+    networks:
+      syncthing_net:
+        ipv4_address: "{{ service_config.ip_address }}"
+    healthcheck:
+      test: "curl -fSs http://localhost:8384 || exit 1"
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  syncthing_net:
+    name: syncthing_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "{{ service_config.subnet }}"
+
+volumes:
+  syncthing_data:
+    name: syncthing_data
