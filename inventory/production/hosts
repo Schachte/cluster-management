@@ -8,6 +8,8 @@ db1 ansible_host=155.155.155.2
 
 [gitea]
 gitea1 ansible_host=155.155.155.2
+gitea2 ansible_host=155.155.155.3
+gitea3 ansible_host=155.155.155.4
 
 [syncthing]
 syncthing1 ansible_host=155.155.155.2

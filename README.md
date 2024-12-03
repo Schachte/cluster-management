@@ -5,15 +5,6 @@
 
 Automated deployment and management of Docker containers in a homelab environment using Ansible. This repository contains scripts, playbooks, and templates for maintaining a consistent and reproducible infrastructure.
 
-## ✨ Features
-
-- 🐳 Docker container deployment automation
-- 📝 Templated service configurations
-- 🔄 Lifecycle management with pre/post hooks
-- 🔐 Secure secrets management with Ansible Vault
-- 📁 Standardized directory structure
-- 🧰 Utility scripts for common operations
-
 ## 🚀 Quick Start
 
 ```bash

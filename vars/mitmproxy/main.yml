@@ -7,6 +7,7 @@ mitmproxy_version: "latest"
 service_data_dir: "{{ mitmproxy_data_dir }}"
 service_directories:
   - "{{ mitmproxy_data_dir }}"
+  - "{{ mitmproxy_data_dir }}/nginx/conf.d"
 
 # docker config
 service_config:
@@ -21,3 +22,9 @@ service_config:
 config_templates:
   - src: "../../templates/mitmproxy/docker-compose.yml"
     dest: "{{ mitmproxy_data_dir }}/docker-compose.yml"
+  - src: "../../templates/mitmproxy/nginx/conf.d/default.conf"
+    dest: "{{ mitmproxy_data_dir }}/nginx/conf.d/default.conf"
+  - src: "../../templates/mitmproxy/nginx.Dockerfile"
+    dest: "{{ mitmproxy_data_dir }}/nginx.Dockerfile"
+  - src: "../../templates/mitmproxy/docker-entrypoint.sh"
+    dest: "{{ mitmproxy_data_dir }}/docker-entrypoint.sh"
