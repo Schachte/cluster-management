@@ -48,6 +48,8 @@ config_templates:
     dest: "{{ nginx_config_dir }}/docker-compose.yml"
   - src: "../../templates/nginx-proxy/nginx.conf"
     dest: "{{ nginx_config_dir }}/nginx.conf"
+
+  # Services
   - src: "../../templates/nginx-proxy/conf.d/mitm.conf"
     dest: "{{ nginx_vhost_dir }}/mitm.conf"
   - src: "../../templates/nginx-proxy/conf.d/syncthing.conf"
@@ -56,9 +58,15 @@ config_templates:
     dest: "{{ nginx_vhost_dir }}/gitea.conf"
   - src: "../../templates/nginx-proxy/conf.d/default.conf"
     dest: "{{ nginx_vhost_dir }}/default.conf"
+
+  # Certs
   - src: "../../templates/nginx-proxy/certs/nginx.crt"
     dest: "{{ nginx_certs_dir }}/nginx.crt"
   - src: "../../templates/nginx-proxy/certs/nginx.key"
     dest: "{{ nginx_certs_dir }}/nginx.key"
   - src: "../../templates/nginx-proxy/certs/cert.conf"
     dest: "{{ nginx_certs_dir }}/cert.conf"
+  - src: "../../templates/nginx-proxy/certs/ca.srl"
+    dest: "{{ nginx_certs_dir }}/ca.srl"
+  - src: "../../templates/nginx-proxy/certs/ca.crt"
+    dest: "{{ nginx_certs_dir }}/ca.crt"
