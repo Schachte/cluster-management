@@ -1,0 +1,30 @@
+---
+# ansible vars
+mitmproxy_data_dir: "/data/mitmproxy"
+mitmproxy_version: "latest"
+
+# directories
+service_data_dir: "{{ mitmproxy_data_dir }}"
+service_directories:
+  - "{{ mitmproxy_data_dir }}"
+  - "{{ mitmproxy_data_dir }}/nginx/conf.d"
+
+# docker config
+service_config:
+  name: mitmproxy
+  port: 8082
+  environment:
+    USER_UID: 1000
+    USER_GID: 1000
+  ip_address: "172.25.0.2"
+
+# templates
+config_templates:
+  - src: "../../templates/mitmproxy/docker-compose.yml"
+    dest: "{{ mitmproxy_data_dir }}/docker-compose.yml"
+  - src: "../../templates/mitmproxy/nginx/conf.d/default.conf"
+    dest: "{{ mitmproxy_data_dir }}/nginx/conf.d/default.conf"
+  - src: "../../templates/mitmproxy/nginx.Dockerfile"
+    dest: "{{ mitmproxy_data_dir }}/nginx.Dockerfile"
+  - src: "../../templates/mitmproxy/docker-entrypoint.sh"
+    dest: "{{ mitmproxy_data_dir }}/docker-entrypoint.sh"

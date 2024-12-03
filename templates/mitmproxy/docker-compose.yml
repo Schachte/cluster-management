@@ -1,0 +1,75 @@
+services:
+  mitmweb:
+    image: mitmproxy/mitmproxy
+    container_name: "mitmproxy"
+    tty: true
+    ports:
+      # Proxy port
+      - "8585:8080"
+      # Web interface
+      - "9595:9090"
+    volumes:
+      - mitmproxy_certs:/home/mitmproxy/.mitmproxy
+    command:
+      - mitmweb
+      - "--web-host"
+      - "0.0.0.0"
+      - "--web-port"
+      - "9090"
+      - "--listen-port"
+      - "8080"
+      - "--listen-host"
+      - "0.0.0.0"
+      # Enable TLS interception
+      - "--mode"
+      - "regular"
+      # Set certificate generation
+      - "--set"
+      - "confdir=/home/mitmproxy/.mitmproxy"
+      # Skip intercepting own traffic
+      - "--ignore-hosts"
+      - "^172.25.0.1(0|1)$"
+    networks:
+      mitmproxy_net:
+        ipv4_address: "172.25.0.10"
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    container_name: "mitmproxy-cert"
+    ports:
+      - "8484:443"
+    volumes:
+      - mitmproxy_certs:/usr/share/nginx/certs:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      mitmproxy_net:
+        ipv4_address: "172.25.0.11"
+    depends_on:
+      - mitmweb
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+networks:
+  mitmproxy_net:
+    name: mitmproxy_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.25.0.0/24"
+
+volumes:
+  mitmproxy_certs:
+    name: mitmproxy_certs

@@ -15,12 +15,6 @@ lint:
 install-docker:
 	ansible-playbook playbooks/tools/install-docker.yml
 
-deploy-postgres:
-	ansible-playbook playbooks/containers/postgres.yml
-
-deploy-gitea:
-	ansible-playbook playbooks/containers/gitea.yml
-
 create-container:
 	@scripts/create-container.sh
 
@@ -28,11 +22,11 @@ remove-container:
 	@scripts/remove-container.sh
 
 # Dynamic targets
-deploy-%:
+prod-deploy-%:
 	@if [ -f "playbooks/containers/$*.yml" ]; then \
 		ansible-playbook -i inventory/production playbooks/containers/$*.yml \
-			--vault-password-file=credentials/.vault_pass \
-			--become-password-file=credentials/.become_pass; \
+			--become-password-file=credentials/.become_pass \
+			--vault-password-file=credentials/.vault_pass; \
 	else \
 		echo "No playbook found for $*"; \
 		exit 1; \

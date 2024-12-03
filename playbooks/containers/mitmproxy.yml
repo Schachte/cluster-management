@@ -1,0 +1,15 @@
+---
+- name: Deploy Mitmproxy
+  hosts: mitmproxy
+  become: true
+  vars_files:
+    - ../../group_vars/all/all.yml
+    - ../../vars/mitmproxy/main.yml
+  roles:
+    - role: docker
+      vars:
+        # rollback: true
+        # debug: true
+        container_volumes:
+          - mitmproxy
+        container_name: "mitmproxy"
