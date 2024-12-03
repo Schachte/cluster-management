@@ -1,0 +1,64 @@
+---
+# nginx_http_port: 80
+# nginx_https_port: 443
+# nginx_worker_connections: 1024
+# nginx_keepalive_timeout: 65
+# nginx_error_log_level: warn
+
+nginx_config_dir: /data/nginx-proxy
+nginx_certs_dir: "{{ nginx_config_dir }}/certs"
+nginx_vhost_dir: "{{ nginx_config_dir }}/conf.d"
+
+nginx_http_port: 80
+nginx_https_port: 443
+
+nginx_worker_connections: 1024
+nginx_keepalive_timeout: 65
+nginx_error_log_level: warn
+
+# Example vhost configurations
+nginx_vhosts:
+  - domain: n1
+    container_name: gitea
+    container_port: 3000
+    ssl_enabled: false
+
+# directories
+service_data_dir: "{{ nginx_config_dir }}"
+service_directories:
+  - "{{ nginx_config_dir }}"
+  - "{{ nginx_certs_dir }}"
+  - "{{ nginx_vhost_dir }}"
+
+domain: n1
+container_port: 80
+
+# docker config
+service_config:
+  name: nginx-proxy
+  port: "{{ nginx_http_port }}"
+  environment:
+    USER_UID: 1000
+    USER_GID: 1000
+  ip_address: "172.25.0.3"
+
+# templates
+config_templates:
+  - src: "../../templates/nginx-proxy/docker-compose.yml"
+    dest: "{{ nginx_config_dir }}/docker-compose.yml"
+  - src: "../../templates/nginx-proxy/nginx.conf"
+    dest: "{{ nginx_config_dir }}/nginx.conf"
+  - src: "../../templates/nginx-proxy/conf.d/mitm.conf"
+    dest: "{{ nginx_vhost_dir }}/mitm.conf"
+  - src: "../../templates/nginx-proxy/conf.d/syncthing.conf"
+    dest: "{{ nginx_vhost_dir }}/syncthing.conf"
+  - src: "../../templates/nginx-proxy/conf.d/gitea.conf"
+    dest: "{{ nginx_vhost_dir }}/gitea.conf"
+  - src: "../../templates/nginx-proxy/conf.d/default.conf"
+    dest: "{{ nginx_vhost_dir }}/default.conf"
+  - src: "../../templates/nginx-proxy/certs/nginx.crt"
+    dest: "{{ nginx_certs_dir }}/nginx.crt"
+  - src: "../../templates/nginx-proxy/certs/nginx.key"
+    dest: "{{ nginx_certs_dir }}/nginx.key"
+  - src: "../../templates/nginx-proxy/certs/cert.conf"
+    dest: "{{ nginx_certs_dir }}/cert.conf"

@@ -14,3 +14,6 @@ syncthing1 ansible_host="192.168.66.8" node_type=worker ansible_ssh_common_args=
 
 [mitmproxy]
 mitmproxy1 ansible_host="192.168.66.8" node_type=worker ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[nginx-proxy]
+nginx-proxy1 ansible_host="192.168.66.8" node_type=worker ansible_ssh_common_args='-o StrictHostKeyChecking=no'

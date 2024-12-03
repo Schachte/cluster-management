@@ -1,0 +1,17 @@
+---
+- name: Deploy NGINX Proxy
+  hosts: "nginx-proxy"
+  become: true
+  vars_files:
+    - ../../group_vars/all/all.yml
+    - "../../vars/nginx-proxy/main.yml"
+  roles:
+    - role: docker
+      vars:
+        # rollback: true
+        debug: true
+        container_volumes:
+          - nginx_data
+        container_name: "nginx"
+        # (important) prevent wiping data when redeploying
+        remove_volumes: false

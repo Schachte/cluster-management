@@ -21,6 +21,9 @@ create-container:
 remove-container:
 	@scripts/remove-container.sh
 
+trust-nginx-cert:
+	@scripts/trust-nginx-cert.sh
+
 # Dynamic targets
 prod-deploy-%:
 	@if [ -f "playbooks/containers/$*.yml" ]; then \
