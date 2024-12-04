@@ -1,0 +1,19 @@
+---
+linkding_config_dir: /data/linkding
+service_data_dir: "{{ linkding_config_dir }}"
+service_directories:
+  - "{{ linkding_config_dir }}"
+
+# docker config
+service_config:
+  name: linkding
+  port: "7500"
+  environment:
+    USER_UID: 1000
+    USER_GID: 1000
+  ip_address: "172.27.0.3"
+
+# templates
+config_templates:
+  - src: "../../templates/linkding/docker-compose.yml"
+    dest: "{{ linkding_config_dir }}/docker-compose.yml"

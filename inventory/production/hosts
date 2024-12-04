@@ -17,3 +17,9 @@ mitmproxy1 ansible_host=155.155.155.4
 
 [nginx-proxy]
 nginx-proxy1 ansible_host=155.155.155.4
+
+[clickhouse]
+clickhouse1 ansible_host=155.155.155.2
+
+[linkding]
+linkding1 ansible_host=155.155.155.3

@@ -1,0 +1,26 @@
+---
+# ansible vars
+clickhouse_data_dir: "/data/clickhouse"
+clickhouse_backup_dir: "/backup/clickhouse"
+clickhouse_version: "latest"
+
+# directories
+service_data_dir: "${{ clickhouse_data_dir }}"
+service_directories:
+  - "${{ clickhouse_data_dir }}"
+
+# docker config
+service_config:
+  name: clickhouse
+  port: 8080
+  environment:
+    USER_UID: 1000
+    USER_GID: 1000
+  ip_address: "172.26.0.3"
+
+# templates
+config_templates:
+  - src: "../../templates/clickhouse/docker-compose.yml"
+    dest: "${{ clickhouse_data_dir }}/docker-compose.yml"
+  - src: "../../templates/clickhouse/users.xml"
+    dest: "${{ clickhouse_data_dir }}/users.xml"

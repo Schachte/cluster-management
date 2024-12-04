@@ -1,0 +1,64 @@
+services:
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:24.3.6
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123" # HTTP interface
+      - "9000:9000" # Native ClickHouse protocol
+      - "9009:9009" # Inter-server communication port
+    networks:
+      clickhouse_net:
+        ipv4_address: "{{ service_config.ip_address }}"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    cap_add:
+      - SYS_NICE
+      - NET_ADMIN
+      - IPC_LOCK
+      - SYS_PTRACE
+    restart: always
+    volumes:
+      - ./users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_users:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  ch-ui:
+    image: ghcr.io/caioricciuti/ch-ui:latest
+    restart: always
+    networks:
+      - clickhouse_net
+    ports:
+      - "${CH_UI_PORT:-5521}:5521"
+    environment:
+      VITE_CLICKHOUSE_URL: "http://192.168.1.182:8123" # OPTIONAL
+      VITE_CLICKHOUSE_USER: "${CLICKHOUSE_USER:-admin}" # OPTIONAL
+      VITE_CLICKHOUSE_PASS: "${CLICKHOUSE_PASSWORD:-admin}" # OPTIONAL
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  clickhouse_data:
+  clickhouse_logs:
+  clickhouse_users:
+
+networks:
+  clickhouse_net:
+    name: clickhouse_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.26.0.0/24"

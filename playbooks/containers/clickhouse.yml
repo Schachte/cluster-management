@@ -1,0 +1,13 @@
+---
+- name: Deploy Clickhouse
+  hosts: clickhouse
+  become: true
+  vars_files:
+    - ../../group_vars/all/all.yml
+    - ../../vars/clickhouse/main.yml
+  roles:
+    - role: docker
+      vars:
+        pre_deploy_tasks: "../../roles/clickhouse/tasks/pre_deploy.yml"
+        post_deploy_tasks: "../../roles/clickhouse/tasks/post_deploy.yml"
+        post_healthy_tasks: "../../roles/clickhouse/tasks/post_healthy.yml"

@@ -1,0 +1,29 @@
+services:
+  linkding:
+    container_name: "${LD_CONTAINER_NAME:-linkding}"
+    image: sissbruecker/linkding:latest
+    ports:
+      - "${LD_HOST_PORT:-9090}:9090"
+    volumes:
+      - linkding_data:/etc/linkding/data
+    restart: unless-stopped
+    networks:
+      linkding_net:
+        ipv4_address: "{{ service_config.ip_address }}"
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  linkding_net:
+    name: linkding_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.27.0.0/24"
+
+volumes:
+  linkding_data:
